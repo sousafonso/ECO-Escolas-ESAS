@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
 
         // Coletar dados do formulário
+        const escola = document.querySelector('input[name="escola"]:checked').value;
         const sala = document.getElementById('sala').value;
         const luzes = document.querySelector('input[name="luzes"]:checked').value;
         const luzNatural = document.querySelector('input[name="luzNatural"]:checked').value;
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Preparar dados para enviar
         const avaliacao = {
+            escola: escola,
             sala: sala,
             luzes: luzes === 'sim',
             luzNatural: luzNatural === 'sim',

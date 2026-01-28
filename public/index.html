@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avaliação Ecológica - ECO Escolas ESAS</title>
+    <title>Avaliação Energética - ECO Escolas ESAS</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
                 <img src="images/eco-escolas.png" alt="ECO Escolas" class="logo">
                 <img src="images/esas.jpg" alt="ESAS" class="logo">
             </div>
-            <h1>🌱 Avaliação Ecológica</h1>
+            <h1>🌱 Avaliação Energética</h1>
             <p class="subtitle">Ajude-nos a tornar a nossa escola mais sustentável!</p>
         </header>
 
@@ -27,12 +27,27 @@
             <form id="avaliacaoForm" class="form-card">
                 <div class="form-group">
                     <label for="sala">Indique o Nome da Sala:</label>
-                    <input type="text" id="sala" placeholder="Ex: Sala A1, Laboratório 1, Biblioteca..." required>
+                    <input type="text" id="sala" placeholder="Ex: Sala 101, Sala 102, Biblioteca..." required>
                 </div>
 
                 <div class="questions">
                     <div class="question-group">
-                        <h3>1. Luzes desligadas quando a sala está vazia?</h3>
+                        <h3>1. Qual é a escola?</h3>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="escola" value="ESAS" required>
+                                <span class="radio-custom"></span>
+                                ESAS
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="escola" value="Nogueira" required>
+                                <span class="radio-custom"></span>
+                                Nogueira
+                            </label>
+                        </div>
+                    </div>
+                    <div class="question-group">
+                        <h3>2. Aproveitamento da luz natural (estores abertos)?</h3>
                         <div class="radio-group">
                             <label class="radio-label">
                                 <input type="radio" name="luzes" value="sim" required>
@@ -48,7 +63,7 @@
                     </div>
 
                     <div class="question-group">
-                        <h3>2. Aproveitamento da luz natural (estores abertos)?</h3>
+                        <h3>3. Aproveitamento da luz natural (estores abertos)?</h3>
                         <div class="radio-group">
                             <label class="radio-label">
                                 <input type="radio" name="luzNatural" value="sim" required>
@@ -64,7 +79,7 @@
                     </div>
 
                     <div class="question-group">
-                        <h3>3. Computadores desligados quando não estão a ser usados?</h3>
+                        <h3>4. Computadores desligados quando não estão a ser usados?</h3>
                         <div class="radio-group">
                             <label class="radio-label">
                                 <input type="radio" name="computadores" value="sim" required>
@@ -80,7 +95,7 @@
                     </div>
 
                     <div class="question-group">
-                        <h3>4. Projetor desligado no fim da aula?</h3>
+                        <h3>5. Projetor desligado no fim da aula?</h3>
                         <div class="radio-group">
                             <label class="radio-label">
                                 <input type="radio" name="projetor" value="sim" required>
@@ -103,7 +118,7 @@
         </main>
 
         <footer>
-            <p>© 2026 | Gioconda Gregório</p>
+            <p>Ano Letivo 2025-2026 | Coordenadora Eco-Escolas | Gioconda Gregório</p>
         </footer>
     </div>
 

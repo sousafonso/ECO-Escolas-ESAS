@@ -1,12 +1,12 @@
-# 🌱 ECO Escolas ESAS - Sistema de Avaliação Ecológica
+# 🌱 ECO Escolas ESAS - Sistema de Avaliação Energética
 
-Sistema web para análise e monitorização da qualidade ecológica das salas da escola ESAS, desenvolvido para o programa ECO-Escolas.
+Sistema web para análise e monitorização da qualidade Energética das salas da escola ESAS, desenvolvido para o programa ECO-Escolas.
 
 ## 📋 Funcionalidades
 
 - ✅ **Formulário de Avaliação**: Alunos podem avaliar salas sem necessidade de login
 - 📊 **Dashboard de Estatísticas**: Visualização de dados com gráficos interativos
-- 🏆 **Ranking de Salas**: Classificação das salas mais sustentáveis
+- 🏆 **Ranking de Salas**: Classificação das salas mais sustentáveis em termos energéticos
 - 📱 **Design Responsivo**: Funciona perfeitamente em dispositivos móveis
 - 💾 **Persistência de Dados**: Armazenamento centralizado com Firebase Firestore
 - 🔍 **Filtros Temporais**: Análise por dia, semana, mês ou período total
@@ -19,11 +19,11 @@ Cada sala é avaliada com base em 4 critérios:
 3. Computadores desligados quando não estão a ser usados
 4. Projetor desligado no fim da aula
 
-### Classificação Ecológica
+### Classificação Energética
 
-- **Ecológica**: 0-1 respostas "não" (3 pontos)
-- **Pouco Ecológica**: 2-3 respostas "não" (1 ponto)
-- **Não Ecológica**: 4 respostas "não" (0 pontos)
+- **Energética**: 0-1 respostas "não" (3 pontos)
+- **Pouco Energética**: 2-3 respostas "não" (1 ponto)
+- **Não Energética**: 4 respostas "não" (0 pontos)
 
 ## 🚀 Configuração e Deploy
 
@@ -154,7 +154,7 @@ ECO-Escolas-ESAS/
 
 1. Aceda ao site: `https://sousafonso.github.io/ECO-Escolas-ESAS/`
 2. Selecione a sala que está a avaliar
-3. Responda às 4 questões sobre práticas ecológicas
+3. Responda às 4 questões sobre práticas Energéticas
 4. Clique em "Enviar Avaliação"
 
 ### Para Consultar Estatísticas

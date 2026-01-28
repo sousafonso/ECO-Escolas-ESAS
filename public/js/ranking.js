@@ -1,9 +1,11 @@
 // Lógica do ranking
 document.addEventListener('DOMContentLoaded', function() {
     const filterBtns = document.querySelectorAll('.filter-btn');
+    const escolaFilterSelect = document.getElementById('escolaFilter');
     const rankingContainer = document.getElementById('rankingContainer');
     const loadingDiv = document.getElementById('loading');
     let filtroAtual = 'diario';
+    let escolaAtual = '';
 
     // Event listeners para filtros
     filterBtns.forEach(btn => {
@@ -13,6 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
             filtroAtual = this.dataset.filter;
             carregarRanking();
         });
+    });
+
+    // Event listener para filtro de escola
+    escolaFilterSelect.addEventListener('change', function() {
+        escolaAtual = this.value;
+        carregarRanking();
     });
 
     // Função para calcular data inicial baseada no filtro
@@ -53,10 +61,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 avaliacoes.push(doc.data());
             });
 
+            // Filtrar por escola se selecionada
+            const avaliacoesFiltradas = escolaAtual 
+                ? avaliacoes.filter(av => av.escola === escolaAtual)
+                : avaliacoes;
+
             // Calcular pontuação por sala
             const salasPontuacao = {};
 
-            avaliacoes.forEach(av => {
+            avaliacoesFiltradas.forEach(av => {
                 if (!salasPontuacao[av.sala]) {
                     salasPontuacao[av.sala] = {
                         nome: av.sala,
@@ -71,9 +84,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 salasPontuacao[av.sala].totalAvaliacoes++;
 
                 // Sistema de pontuação:
-                // Ecológica: 3 pontos
-                // Pouco Ecológica: 1 ponto
-                // Não Ecológica: 0 pontos
+                // Energética: 3 pontos
+                // Pouco Energética: 1 ponto
+                // Não Energética: 0 pontos
                 if (av.nivelEcologico === 'ecologica') {
                     salasPontuacao[av.sala].pontos += 3;
                     salasPontuacao[av.sala].ecologicas++;
@@ -114,13 +127,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Determinar classificação geral
             let classificacao = 'nao-ecologica';
-            let classificacaoTexto = 'Não Ecológica';
+            let classificacaoTexto = 'Não Energética';
             if (media >= 2.5) {
                 classificacao = 'ecologica';
-                classificacaoTexto = 'Ecológica';
+                classificacaoTexto = 'Energética';
             } else if (media >= 1.5) {
                 classificacao = 'pouco-ecologica';
-                classificacaoTexto = 'Pouco Ecológica';
+                classificacaoTexto = 'Pouco Energética';
             }
 
             const itemDiv = document.createElement('div');
@@ -137,9 +150,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="ranking-sala">${sala.nome}</div>
                     <div class="ranking-details">
                         ${sala.totalAvaliacoes} avaliações • 
-                        ${sala.ecologicas} ecológicas, 
-                        ${sala.poucoEcologicas} pouco ecológicas, 
-                        ${sala.naoEcologicas} não ecológicas
+                        ${sala.ecologicas} Energéticas, 
+                        ${sala.poucoEcologicas} pouco Energéticas, 
+                        ${sala.naoEcologicas} não Energéticas
                     </div>
                 </div>
                 <div class="ranking-badge ${classificacao}">

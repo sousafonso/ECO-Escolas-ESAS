@@ -1,9 +1,11 @@
 // Lógica do dashboard
 document.addEventListener('DOMContentLoaded', function() {
     const filterBtns = document.querySelectorAll('.filter-btn');
+    const escolaFilterSelect = document.getElementById('escolaFilter');
     const salaFilterSelect = document.getElementById('salaFilter');
     const loadingDiv = document.getElementById('loading');
     let filtroAtual = 'diario';
+    let escolaAtual = '';
     let salaAtual = '';
     let chartSalas, chartCategorias;
     let todasAvaliacoes = [];
@@ -16,6 +18,15 @@ document.addEventListener('DOMContentLoaded', function() {
             filtroAtual = this.dataset.filter;
             carregarDados();
         });
+    });
+
+    // Event listener para filtro de escola
+    escolaFilterSelect.addEventListener('change', function() {
+        escolaAtual = this.value;
+        // Resetar filtro de sala quando mudar de escola
+        salaAtual = '';
+        salaFilterSelect.value = '';
+        carregarDados();
     });
 
     // Event listener para filtro de sala
@@ -61,15 +72,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 todasAvaliacoes.push(doc.data());
             });
 
-            // Preencher select de salas se vazio
-            if (salaFilterSelect.children.length <= 1) {
-                preencherSelectSalas(todasAvaliacoes);
-            }
+            // Preencher select de salas sempre que carregar dados
+            preencherSelectSalas(todasAvaliacoes);
 
-            // Filtrar por sala se selecionada
-            const avaliacoesFiltradas = salaAtual 
-                ? todasAvaliacoes.filter(av => av.sala === salaAtual)
-                : todasAvaliacoes;
+            // Filtrar por escola e sala se selecionadas
+            let avaliacoesFiltradas = todasAvaliacoes;
+            
+            if (escolaAtual) {
+                avaliacoesFiltradas = avaliacoesFiltradas.filter(av => av.escola === escolaAtual);
+            }
+            
+            if (salaAtual) {
+                avaliacoesFiltradas = avaliacoesFiltradas.filter(av => av.sala === salaAtual);
+            }
 
             // Processar e exibir dados
             processarEstatisticas(avaliacoesFiltradas);
@@ -85,7 +100,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Preencher select com as salas disponíveis
     function preencherSelectSalas(avaliacoes) {
-        const salas = [...new Set(avaliacoes.map(av => av.sala))].sort();
+        // Filtrar avaliações por escola se selecionada
+        const avaliacoesFiltradas = escolaAtual 
+            ? avaliacoes.filter(av => av.escola === escolaAtual)
+            : avaliacoes;
+
+        const salas = [...new Set(avaliacoesFiltradas.map(av => av.sala))].sort();
+        
+        // Limpar opções existentes (exceto a primeira)
+        salaFilterSelect.innerHTML = '<option value="">-- Todas as Salas --</option>';
         
         salas.forEach(sala => {
             const option = document.createElement('option');
@@ -174,17 +197,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: salas,
                 datasets: [
                     {
-                        label: 'Ecológica',
+                        label: 'Energética',
                         data: ecologicas,
                         backgroundColor: '#27ae60',
                     },
                     {
-                        label: 'Pouco Ecológica',
+                        label: 'Pouco Energética',
                         data: poucoEcologicas,
                         backgroundColor: '#f39c12',
                     },
                     {
-                        label: 'Não Ecológica',
+                        label: 'Não Energética',
                         data: naoEcologicas,
                         backgroundColor: '#e74c3c',
                     }
@@ -313,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chartSalas = new Chart(ctxSalas, {
             type: 'doughnut',
             data: {
-                labels: ['Ecológica', 'Pouco Ecológica', 'Não Ecológica'],
+                labels: ['Energética', 'Pouco Energética', 'Não Energética'],
                 datasets: [{
                     data: [
                         niveisEcologicos.ecologica,
