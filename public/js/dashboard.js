@@ -1,11 +1,14 @@
 // Lógica do dashboard
 document.addEventListener('DOMContentLoaded', function() {
     const filterBtns = document.querySelectorAll('.filter-btn');
+    const salaFilterSelect = document.getElementById('salaFilter');
     const loadingDiv = document.getElementById('loading');
     let filtroAtual = 'diario';
+    let salaAtual = '';
     let chartSalas, chartCategorias;
+    let todasAvaliacoes = [];
 
-    // Event listeners para filtros
+    // Event listeners para filtros de período
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             filterBtns.forEach(b => b.classList.remove('active'));
@@ -13,6 +16,12 @@ document.addEventListener('DOMContentLoaded', function() {
             filtroAtual = this.dataset.filter;
             carregarDados();
         });
+    });
+
+    // Event listener para filtro de sala
+    salaFilterSelect.addEventListener('change', function() {
+        salaAtual = this.value;
+        carregarDados();
     });
 
     // Função para calcular data inicial baseada no filtro
@@ -47,14 +56,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 .where('timestamp', '>=', dataInicial)
                 .get();
 
-            const avaliacoes = [];
+            todasAvaliacoes = [];
             snapshot.forEach(doc => {
-                avaliacoes.push(doc.data());
+                todasAvaliacoes.push(doc.data());
             });
 
+            // Preencher select de salas se vazio
+            if (salaFilterSelect.children.length <= 1) {
+                preencherSelectSalas(todasAvaliacoes);
+            }
+
+            // Filtrar por sala se selecionada
+            const avaliacoesFiltradas = salaAtual 
+                ? todasAvaliacoes.filter(av => av.sala === salaAtual)
+                : todasAvaliacoes;
+
             // Processar e exibir dados
-            processarEstatisticas(avaliacoes);
-            criarGraficos(avaliacoes);
+            processarEstatisticas(avaliacoesFiltradas);
+            criarGraficos(avaliacoesFiltradas);
 
         } catch (error) {
             console.error('Erro ao carregar dados:', error);
@@ -62,6 +81,18 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             loadingDiv.style.display = 'none';
         }
+    }
+
+    // Preencher select com as salas disponíveis
+    function preencherSelectSalas(avaliacoes) {
+        const salas = [...new Set(avaliacoes.map(av => av.sala))].sort();
+        
+        salas.forEach(sala => {
+            const option = document.createElement('option');
+            option.value = sala;
+            option.textContent = sala;
+            salaFilterSelect.appendChild(option);
+        });
     }
 
     // Processar estatísticas
@@ -94,6 +125,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Criar gráficos
     function criarGraficos(avaliacoes) {
+        if (salaAtual) {
+            // Se uma sala foi selecionada, mostrar gráficos específicos dessa sala
+            criarGraficosSala(avaliacoes);
+        } else {
+            // Se não há sala selecionada, mostrar comparação entre salas
+            criarGraficosComparacao(avaliacoes);
+        }
+    }
+
+    // Criar gráficos de comparação (todas as salas)
+    function criarGraficosComparacao(avaliacoes) {
         // Preparar dados por sala
         const dadosPorSala = {};
         
@@ -175,6 +217,128 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Preparar dados por categoria
+        const categorias = {
+            luzes: { sim: 0, nao: 0 },
+            luzNatural: { sim: 0, nao: 0 },
+            computadores: { sim: 0, nao: 0 },
+            projetor: { sim: 0, nao: 0 }
+        };
+
+        avaliacoes.forEach(av => {
+            categorias.luzes[av.luzes ? 'sim' : 'nao']++;
+            categorias.luzNatural[av.luzNatural ? 'sim' : 'nao']++;
+            categorias.computadores[av.computadores ? 'sim' : 'nao']++;
+            categorias.projetor[av.projetor ? 'sim' : 'nao']++;
+        });
+
+        const nomesCategorias = [
+            'Luzes Desligadas',
+            'Luz Natural',
+            'Computadores Desligados',
+            'Projetor Desligado'
+        ];
+        const simData = [
+            categorias.luzes.sim,
+            categorias.luzNatural.sim,
+            categorias.computadores.sim,
+            categorias.projetor.sim
+        ];
+        const naoData = [
+            categorias.luzes.nao,
+            categorias.luzNatural.nao,
+            categorias.computadores.nao,
+            categorias.projetor.nao
+        ];
+
+        // Gráfico de categorias
+        const ctxCategorias = document.getElementById('chartCategorias').getContext('2d');
+        if (chartCategorias) {
+            chartCategorias.destroy();
+        }
+        chartCategorias = new Chart(ctxCategorias, {
+            type: 'bar',
+            data: {
+                labels: nomesCategorias,
+                datasets: [
+                    {
+                        label: 'Sim',
+                        data: simData,
+                        backgroundColor: '#27ae60',
+                    },
+                    {
+                        label: 'Não',
+                        data: naoData,
+                        backgroundColor: '#e74c3c',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Criar gráficos para uma sala específica
+    function criarGraficosSala(avaliacoes) {
+        // Gráfico de nível ecológico ao longo do tempo para a sala
+        const niveisEcologicos = { ecologica: 0, poucoEcologica: 0, naoEcologica: 0 };
+        
+        avaliacoes.forEach(av => {
+            niveisEcologicos[av.nivelEcologico]++;
+        });
+
+        // Gráfico de pizza com níveis ecológicos
+        const ctxSalas = document.getElementById('chartSalas').getContext('2d');
+        if (chartSalas) {
+            chartSalas.destroy();
+        }
+        chartSalas = new Chart(ctxSalas, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ecológica', 'Pouco Ecológica', 'Não Ecológica'],
+                datasets: [{
+                    data: [
+                        niveisEcologicos.ecologica,
+                        niveisEcologicos.poucoEcologica,
+                        niveisEcologicos.naoEcologica
+                    ],
+                    backgroundColor: ['#27ae60', '#f39c12', '#e74c3c']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: `Avaliações da ${salaAtual}`
+                    }
+                }
+            }
+        });
+
+        // Preparar dados por categoria para a sala
         const categorias = {
             luzes: { sim: 0, nao: 0 },
             luzNatural: { sim: 0, nao: 0 },
