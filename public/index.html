@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliação Ecológica - ECO Escolas ESAS</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="images/eco-escolas.png" alt="ECO Escolas" class="logo">
+                <img src="images/esas.jpg" alt="ESAS" class="logo">
+            </div>
+            <h1>🌱 Avaliação Ecológica</h1>
+            <p class="subtitle">Ajude-nos a tornar a nossa escola mais sustentável!</p>
+        </header>
+
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link active">Avaliação</a>
+            <a href="dashboard.html" class="nav-link">Estatísticas</a>
+            <a href="ranking.html" class="nav-link">Ranking</a>
+        </nav>
+
+        <main>
+            <form id="avaliacaoForm" class="form-card">
+                <div class="form-group">
+                    <label for="sala">Indique o Nome da Sala:</label>
+                    <input type="text" id="sala" placeholder="Ex: Sala A1, Laboratório 1, Biblioteca..." required>
+                </div>
+
+                <div class="questions">
+                    <div class="question-group">
+                        <h3>1. Luzes desligadas quando a sala está vazia?</h3>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="luzes" value="sim" required>
+                                <span class="radio-custom"></span>
+                                Sim
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="luzes" value="nao" required>
+                                <span class="radio-custom"></span>
+                                Não
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <h3>2. Aproveitamento da luz natural (estores abertos)?</h3>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="luzNatural" value="sim" required>
+                                <span class="radio-custom"></span>
+                                Sim
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="luzNatural" value="nao" required>
+                                <span class="radio-custom"></span>
+                                Não
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <h3>3. Computadores desligados quando não estão a ser usados?</h3>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="computadores" value="sim" required>
+                                <span class="radio-custom"></span>
+                                Sim
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="computadores" value="nao" required>
+                                <span class="radio-custom"></span>
+                                Não
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <h3>4. Projetor desligado no fim da aula?</h3>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="projetor" value="sim" required>
+                                <span class="radio-custom"></span>
+                                Sim
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="projetor" value="nao" required>
+                                <span class="radio-custom"></span>
+                                Não
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Enviar Avaliação 🌿</button>
+            </form>
+
+            <div id="mensagem" class="mensagem" style="display: none;"></div>
+        </main>
+
+        <footer>
+            <p>© 2026 ECO Escolas ESAS | Juntos por um futuro sustentável 🌍</p>
+        </footer>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/avaliacao.js"></script>
+</body>
+</html>
