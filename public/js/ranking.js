@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Determinar classificação geral
             let classificacao = 'nao-ecologica';
-            let classificacaoTexto = 'Não eficiente energeticamente';
+            let classificacaoTexto = 'Ineficientes energeticamente';
 
             if (sala.ultimoNivel === 'eficientes-energeticamente') {
                 classificacao = 'ecologica';
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${sala.totalAvaliacoes} avaliações • 
                         ${sala.ecologicas} Eficientes energeticamente, 
                         ${sala.poucoEcologicas} Pouco eficientes energeticamente, 
-                        ${sala.naoEcologicas} Não eficiente energeticamente
+                        ${sala.naoEcologicas} Ineficientes energeticamente
                     </div>
                 </div>
                 <div class="ranking-badge ${classificacao}">
