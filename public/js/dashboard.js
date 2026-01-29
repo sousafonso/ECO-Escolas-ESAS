@@ -322,10 +322,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Criar gráficos para uma sala específica
     function criarGraficosSala(avaliacoes) {
         // Gráfico de nível ecológico ao longo do tempo para a sala
-        const niveisEcologicos = { ecologica: 0, poucoEcologica: 0, naoEcologica: 0 };
+        const niveisEcologicos = {
+            'eficientes-energeticamente': 0,
+            'pouco-eficientes-energeticamente': 0,
+            'nao-eficientes-energeticamente': 0
+        };
         
         avaliacoes.forEach(av => {
-            niveisEcologicos[av.nivelEcologico]++;
+            if (niveisEcologicos[av.nivelEcologico] !== undefined) {
+                niveisEcologicos[av.nivelEcologico]++;
+            }
         });
 
         // Gráfico de pizza com níveis ecológicos
@@ -339,9 +345,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: ['Energética', 'Pouco eficiente energeticamente', 'Não eficiente energeticamente'],
                 datasets: [{
                     data: [
-                        niveisEcologicos.ecologica,
-                        niveisEcologicos.poucoEcologica,
-                        niveisEcologicos.naoEcologica
+                        niveisEcologicos['eficientes-energeticamente'],
+                        niveisEcologicos['pouco-eficientes-energeticamente'],
+                        niveisEcologicos['nao-eficientes-energeticamente']
                     ],
                     backgroundColor: ['#27ae60', '#f39c12', '#e74c3c']
                 }]
