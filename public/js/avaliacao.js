@@ -9,13 +9,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Coletar dados do formulário
         const escola = document.querySelector('input[name="escola"]:checked').value;
         const sala = document.getElementById('sala').value;
-        const luzes = document.querySelector('input[name="luzes"]:checked').value;
+        const luzes_ligadas = document.querySelector('input[name="luzes"]:checked').value;
         const luzNatural = document.querySelector('input[name="luzNatural"]:checked').value;
         const computadores = document.querySelector('input[name="computadores"]:checked').value;
         const projetor = document.querySelector('input[name="projetor"]:checked').value;
 
         // Calcular número de "não"
-        const respostas = [luzes, luzNatural, computadores, projetor];
+        const respostas = [luzes_ligadas, luzNatural, computadores, projetor];
         const numNao = respostas.filter(r => r === 'nao').length;
 
         // Determinar nível ecológico
@@ -30,9 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Preparar dados para enviar
         const avaliacao = {
-            escola: escola,
             sala: sala,
-            luzes: luzes === 'sim',
+            escola: escola,
+            luzes: luzes_ligadas === 'sim',
             luzNatural: luzNatural === 'sim',
             computadores: computadores === 'sim',
             projetor: projetor === 'sim',
