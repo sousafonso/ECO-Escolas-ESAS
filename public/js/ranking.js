@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Sistema de pontuação:
                 // Energética: 3 pontos
-                // Pouco Energética: 1 ponto
+                // Pouco eficiente energeticamente: 1 ponto
                 // Não eficiente energeticamente: 0 pontos
                 if (av.nivelEcologico === 'eficientes-energeticamente') {
                     salasPontuacao[av.sala].pontos += 3;
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 classificacaoTexto = 'Energética';
             } else if (sala.ultimoNivel === 'pouco-eficientes-energeticamente') {
                 classificacao = 'pouco-ecologica';
-                classificacaoTexto = 'Pouco Energética';
+                classificacaoTexto = 'Pouco eficiente energeticamente';
             }
 
             const itemDiv = document.createElement('div');
