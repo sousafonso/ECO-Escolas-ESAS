@@ -141,9 +141,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Atualizar cards de estatísticas
         document.getElementById('totalAvaliacoes').textContent = avaliacoes.length;
-        document.getElementById('salasEcologicas').textContent = salasPorNivel['ecologica'] || 0;
-        document.getElementById('salasPoucoEcologicas').textContent = salasPorNivel['pouco-ecologica'] || 0;
-        document.getElementById('salasNaoEcologicas').textContent = salasPorNivel['nao-ecologica'] || 0;
+        document.getElementById('salasEcologicas').textContent = salasPorNivel['eficientes-energeticamente'] || 0;
+        document.getElementById('salasPoucoEcologicas').textContent = salasPorNivel['pouco-eficientes-energeticamente'] || 0;
+        document.getElementById('salasNaoEcologicas').textContent = salasPorNivel['nao-eficientes-energeticamente'] || 0;
     }
 
     // Criar gráficos
@@ -172,9 +172,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
             }
             dadosPorSala[av.sala].total++;
-            if (av.nivelEcologico === 'ecologica') {
+            if (av.nivelEcologico === 'eficientes-energeticamente') {
                 dadosPorSala[av.sala].ecologica++;
-            } else if (av.nivelEcologico === 'pouco-ecologica') {
+            } else if (av.nivelEcologico === 'pouco-eficientes-energeticamente') {
                 dadosPorSala[av.sala].poucoEcologica++;
             } else {
                 dadosPorSala[av.sala].naoEcologica++;
@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chartSalas = new Chart(ctxSalas, {
             type: 'doughnut',
             data: {
-                labels: ['Energética', 'Pouco Energética', 'Não ecológica energeticamente'],
+                labels: ['Energética', 'Pouco Energética', 'Não eficiente energeticamente'],
                 datasets: [{
                     data: [
                         niveisEcologicos.ecologica,

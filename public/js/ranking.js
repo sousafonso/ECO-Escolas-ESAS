@@ -86,11 +86,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Sistema de pontuação:
                 // Energética: 3 pontos
                 // Pouco Energética: 1 ponto
-                // Não ecológica energeticamente: 0 pontos
-                if (av.nivelEcologico === 'ecologica') {
+                // Não eficiente energeticamente: 0 pontos
+                if (av.nivelEcologico === 'eficientes-energeticamente') {
                     salasPontuacao[av.sala].pontos += 3;
                     salasPontuacao[av.sala].ecologicas++;
-                } else if (av.nivelEcologico === 'pouco-ecologica') {
+                } else if (av.nivelEcologico === 'pouco-eficientes-energeticamente') {
                     salasPontuacao[av.sala].pontos += 1;
                     salasPontuacao[av.sala].poucoEcologicas++;
                 } else {
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Determinar classificação geral
             let classificacao = 'nao-ecologica';
-            let classificacaoTexto = 'Não ecológica energeticamente';
+            let classificacaoTexto = 'Não eficiente energeticamente';
             if (media >= 2.5) {
                 classificacao = 'ecologica';
                 classificacaoTexto = 'Energética';
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${sala.totalAvaliacoes} avaliações • 
                         ${sala.ecologicas} Energéticas, 
                         ${sala.poucoEcologicas} pouco Energéticas, 
-                        ${sala.naoEcologicas} Não ecológica energeticamentes
+                        ${sala.naoEcologicas} Não eficiente energeticamentes
                     </div>
                 </div>
                 <div class="ranking-badge ${classificacao}">
