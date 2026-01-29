@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // Preencher select de salas sempre que carregar dados
-            preencherSelectSalas(todasAvaliacoes);
+            preencherSelectSalas(todasAvaliacoes, salaAtual);
 
             // Filtrar por escola e sala se selecionadas
             let avaliacoesFiltradas = todasAvaliacoes;
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Preencher select com as salas disponíveis
-    function preencherSelectSalas(avaliacoes) {
+    function preencherSelectSalas(avaliacoes, salaSelecionada) {
         // Filtrar avaliações por escola se selecionada
         const avaliacoesFiltradas = escolaAtual 
             ? avaliacoes.filter(av => av.escola === escolaAtual)
@@ -116,6 +116,10 @@ document.addEventListener('DOMContentLoaded', function() {
             option.textContent = sala;
             salaFilterSelect.appendChild(option);
         });
+
+        if (salaSelecionada && salas.includes(salaSelecionada)) {
+            salaFilterSelect.value = salaSelecionada;
+        }
     }
 
     // Processar estatísticas
