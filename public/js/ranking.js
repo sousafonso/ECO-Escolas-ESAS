@@ -77,11 +77,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         totalAvaliacoes: 0,
                         ecologicas: 0,
                         poucoEcologicas: 0,
-                        naoEcologicas: 0
+                        naoEcologicas: 0,
+                        ultimoNivel: null,
+                        ultimoTimestamp: null
                     };
                 }
 
                 salasPontuacao[av.sala].totalAvaliacoes++;
+
+                const timestamp = av.timestamp ? av.timestamp.toDate() : new Date(av.data);
+                if (!salasPontuacao[av.sala].ultimoTimestamp || timestamp > salasPontuacao[av.sala].ultimoTimestamp) {
+                    salasPontuacao[av.sala].ultimoTimestamp = timestamp;
+                    salasPontuacao[av.sala].ultimoNivel = av.nivelEcologico;
+                }
 
                 // Sistema de pontuação:
                 // Energética: 3 pontos
@@ -128,10 +136,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Determinar classificação geral
             let classificacao = 'nao-ecologica';
             let classificacaoTexto = 'Não eficiente energeticamente';
-            if (media >= 2.5) {
+
+            if (sala.ultimoNivel === 'eficientes-energeticamente') {
                 classificacao = 'ecologica';
                 classificacaoTexto = 'Energética';
-            } else if (media >= 1.5) {
+            } else if (sala.ultimoNivel === 'pouco-eficientes-energeticamente') {
                 classificacao = 'pouco-ecologica';
                 classificacaoTexto = 'Pouco Energética';
             }
@@ -150,9 +159,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="ranking-sala">${sala.nome}</div>
                     <div class="ranking-details">
                         ${sala.totalAvaliacoes} avaliações • 
-                        ${sala.ecologicas} Energéticas, 
-                        ${sala.poucoEcologicas} pouco Energéticas, 
-                        ${sala.naoEcologicas} Não eficiente energeticamentes
+                        ${sala.ecologicas} Eficientes energeticamente, 
+                        ${sala.poucoEcologicas} Pouco eficientes energeticamente, 
+                        ${sala.naoEcologicas} Não eficiente energeticamente
                     </div>
                 </div>
                 <div class="ranking-badge ${classificacao}">

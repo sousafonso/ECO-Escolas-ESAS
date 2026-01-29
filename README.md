@@ -154,7 +154,7 @@ ECO-Escolas-ESAS/
 
 1. Aceda ao site: `https://sousafonso.github.io/ECO-Escolas-ESAS/`
 2. Selecione a sala que está a avaliar
-3. Responda às 4 questões sobre práticas Energéticas
+3. Responda às 4 questões sobre práticas Eficientes energeticamente
 4. Clique em "Enviar Avaliação"
 
 ### Para Consultar Estatísticas
