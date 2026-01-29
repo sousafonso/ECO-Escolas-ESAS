@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Coletar dados do formulário
         const escola = document.querySelector('input[name="escola"]:checked').value;
         const sala = document.getElementById('sala').value;
-        const luzes_ligadas = document.querySelector('input[name="luzes"]:checked').value;
+        const luzes_ligadas = document.querySelector('input[name="luzes_ligadas"]:checked').value;
         const luzNatural = document.querySelector('input[name="luzNatural"]:checked').value;
         const computadores = document.querySelector('input[name="computadores"]:checked').value;
         const projetor = document.querySelector('input[name="projetor"]:checked').value;
