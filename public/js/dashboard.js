@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         backgroundColor: '#f39c12',
                     },
                     {
-                        label: 'Não Energética',
+                        label: 'Não ecológica energeticamente',
                         data: naoEcologicas,
                         backgroundColor: '#e74c3c',
                     }
@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chartSalas = new Chart(ctxSalas, {
             type: 'doughnut',
             data: {
-                labels: ['Energética', 'Pouco Energética', 'Não Energética'],
+                labels: ['Energética', 'Pouco Energética', 'Não ecológica energeticamente'],
                 datasets: [{
                     data: [
                         niveisEcologicos.ecologica,

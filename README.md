@@ -23,7 +23,7 @@ Cada sala é avaliada com base em 4 critérios:
 
 - **Energética**: 0-1 respostas "não" (3 pontos)
 - **Pouco Energética**: 2-3 respostas "não" (1 ponto)
-- **Não Energética**: 4 respostas "não" (0 pontos)
+- **Não ecológica energeticamente**: 4 respostas "não" (0 pontos)
 
 ## 🚀 Configuração e Deploy
 

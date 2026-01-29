@@ -21,11 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Determinar nível ecológico
         let nivelEcologico;
         if (numNao === 4) {
-            nivelEcologico = 'nao-ecologica';
+            nivelEcologico = 'nao-eficientes-energeticamente';
         } else if (numNao >= 2) {
-            nivelEcologico = 'pouco-ecologica';
+            nivelEcologico = 'pouco-eficientes-energeticamente';
         } else {
-            nivelEcologico = 'ecologica';
+            nivelEcologico = 'eficientes-energeticamente';
         }
 
         // Preparar dados para enviar
