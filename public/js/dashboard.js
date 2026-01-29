@@ -197,17 +197,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: salas,
                 datasets: [
                     {
-                        label: 'Energética',
+                        label: 'Eficiente energeticamente',
                         data: ecologicas,
                         backgroundColor: '#27ae60',
                     },
                     {
-                        label: 'Pouco Energética',
+                        label: 'Pouco eficiente energeticamente',
                         data: poucoEcologicas,
                         backgroundColor: '#f39c12',
                     },
                     {
-                        label: 'Não ecológica energeticamente',
+                        label: 'Ineficiente energeticamente',
                         data: naoEcologicas,
                         backgroundColor: '#e74c3c',
                     }
