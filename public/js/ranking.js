@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (sala.ultimoNivel === 'eficientes-energeticamente') {
                 classificacao = 'ecologica';
-                classificacaoTexto = 'Energética';
+                classificacaoTexto = 'Eficiente energeticamente';
             } else if (sala.ultimoNivel === 'pouco-eficientes-energeticamente') {
                 classificacao = 'pouco-ecologica';
                 classificacaoTexto = 'Pouco eficiente energeticamente';

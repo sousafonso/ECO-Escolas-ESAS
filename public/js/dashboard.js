@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chartSalas = new Chart(ctxSalas, {
             type: 'doughnut',
             data: {
-                labels: ['Energética', 'Pouco eficiente energeticamente', 'Não eficiente energeticamente'],
+                labels: ['Eficiente energeticamente', 'Pouco eficiente energeticamente', 'Não eficiente energeticamente'],
                 datasets: [{
                     data: [
                         niveisEcologicos['eficientes-energeticamente'],
