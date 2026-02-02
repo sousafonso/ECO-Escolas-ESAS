@@ -195,5 +195,3 @@ Afonso Sousa - [GitHub](https://github.com/sousafonso)
 Este projeto faz parte da iniciativa ECO-Escolas, um programa internacional da Foundation for Environmental Education (FEE) que pretende encorajar ações e reconhecer o trabalho de qualidade desenvolvido pela escola, no âmbito da Educação Ambiental para a Sustentabilidade.
 
 ---
-
-**Juntos por um futuro mais sustentável! 🌱**
