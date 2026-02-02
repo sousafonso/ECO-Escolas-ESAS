@@ -2,10 +2,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     const filterBtns = document.querySelectorAll('.filter-btn');
     const escolaFilterSelect = document.getElementById('escolaFilter');
+    const mesFilterGroup = document.getElementById('mesFilterGroup');
+    const mesFilterSelect = document.getElementById('mesFilter');
     const rankingContainer = document.getElementById('rankingContainer');
     const loadingDiv = document.getElementById('loading');
     let filtroAtual = 'diario';
     let escolaAtual = '';
+    let mesAtual = new Date().getMonth();
 
     // Event listeners para filtros
     filterBtns.forEach(btn => {
@@ -13,9 +16,26 @@ document.addEventListener('DOMContentLoaded', function() {
             filterBtns.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             filtroAtual = this.dataset.filter;
+            
+            // Mostrar/esconder filtro de mês
+            if (filtroAtual === 'mensal') {
+                mesFilterGroup.style.display = 'block';
+            } else {
+                mesFilterGroup.style.display = 'none';
+            }
+            
             carregarRanking();
         });
     });
+
+    // Event listener para filtro de mês
+    mesFilterSelect.addEventListener('change', function() {
+        mesAtual = parseInt(this.value);
+        carregarRanking();
+    });
+
+    // Definir mês atual no select de mês
+    mesFilterSelect.value = mesAtual;
 
     // Event listener para filtro de escola
     escolaFilterSelect.addEventListener('change', function() {
@@ -34,8 +54,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 agora.setDate(agora.getDate() - 7);
                 return agora;
             case 'mensal':
-                agora.setMonth(agora.getMonth() - 1);
-                return agora;
+                // Usar o mês selecionado
+                const anoAtual = agora.getFullYear();
+                // Se o mês selecionado é anterior ao mês atual, é do ano anterior
+                const ano = mesAtual > agora.getMonth() ? anoAtual - 1 : anoAtual;
+                return new Date(ano, mesAtual, 1);
             case 'total':
                 return new Date(2020, 0, 1);
             default:
