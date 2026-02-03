@@ -156,16 +156,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const posicao = index + 1;
             const media = (sala.pontos / sala.totalAvaliacoes).toFixed(1);
             
-            // Determinar classificação geral
+            // Determinar classificação geral com base nas contagens no período
+            // Regras: escolher a categoria com maior número de registos;
+            // em caso de empate, escolher a pior (naoEcologicas > poucoEcologicas > ecologicas)
             let classificacao = 'nao-ecologica';
-            let classificacaoTexto = 'Ineficientes energeticamente';
+            let classificacaoTexto = 'Ineficiente energeticamente';
 
-            if (sala.ultimoNivel === 'eficientes-energeticamente') {
-                classificacao = 'ecologica';
-                classificacaoTexto = 'Eficiente energeticamente';
-            } else if (sala.ultimoNivel === 'pouco-eficientes-energeticamente') {
+            if (sala.naoEcologicas >= sala.poucoEcologicas && sala.naoEcologicas >= sala.ecologicas) {
+                classificacao = 'nao-ecologica';
+                classificacaoTexto = 'Ineficiente energeticamente';
+            } else if (sala.poucoEcologicas >= sala.ecologicas) {
                 classificacao = 'pouco-ecologica';
                 classificacaoTexto = 'Pouco eficiente energeticamente';
+            } else {
+                classificacao = 'ecologica';
+                classificacaoTexto = 'Eficiente energeticamente';
             }
 
             const itemDiv = document.createElement('div');
