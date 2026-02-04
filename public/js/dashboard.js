@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let salaAtual = '';
     let mesAtual = new Date().getMonth();
     let chartSalas, chartCategorias;
+    let chartEscola;
     let todasAvaliacoes = [];
 
     // Event listeners para filtros de período
@@ -98,19 +99,21 @@ document.addEventListener('DOMContentLoaded', function() {
             // Preencher select de salas sempre que carregar dados
             preencherSelectSalas(todasAvaliacoes, salaAtual);
 
-            // Filtrar por escola e sala se selecionadas
-            let avaliacoesFiltradas = todasAvaliacoes;
-            
-            if (escolaAtual) {
-                avaliacoesFiltradas = avaliacoesFiltradas.filter(av => av.escola === escolaAtual);
-            }
-            
+            // Filtrar por escola (para o gráfico da escola) e por sala (para gráficos/estatísticas locais)
+            const avaliacoesPorEscola = escolaAtual
+                ? todasAvaliacoes.filter(av => av.escola === escolaAtual)
+                : todasAvaliacoes;
+
+            // Filtrar por sala se selecionada (para as estatísticas e gráficos por sala)
+            let avaliacoesFiltradas = avaliacoesPorEscola;
             if (salaAtual) {
                 avaliacoesFiltradas = avaliacoesFiltradas.filter(av => av.sala === salaAtual);
             }
 
             // Processar e exibir dados
             processarEstatisticas(avaliacoesFiltradas);
+            // Criar gráfico da escola (usa apenas o filtro de escola)
+            criarGraficoEscola(avaliacoesPorEscola);
             criarGraficos(avaliacoesFiltradas);
 
         } catch (error) {
@@ -341,6 +344,177 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: {
                         display: false
                     }
+                }
+            }
+        });
+    }
+
+    // Criar gráfico de desempenho da escola ao longo do tempo
+    function criarGraficoEscola(avaliacoes) {
+        // Determinar intervalo e buckets conforme o filtroAtual
+        const dataInicial = getDataInicial(filtroAtual);
+        const buckets = [];
+        let labels = [];
+        const reached = []; // se o período já foi alcançado (true) ou é futuro (false)
+        const now = new Date();
+
+        if (filtroAtual === 'diario') {
+            // 24 horas do dia — marcar apenas horas até à hora atual como alcançadas
+            const lastHour = now.getHours();
+            for (let h = 0; h < 24; h++) {
+                buckets.push({ ecologica: 0, poucoEcologica: 0, naoEcologica: 0 });
+                labels.push((h < 10 ? '0' + h : h) + 'h');
+                reached.push(h <= lastHour);
+            }
+        } else if (filtroAtual === 'semanal') {
+            // 7 dias a partir da dataInicial — marcar dias até hoje como alcançados
+            for (let d = 0; d < 7; d++) {
+                const dt = new Date(dataInicial.getTime());
+                dt.setDate(dataInicial.getDate() + d);
+                buckets.push({ ecologica: 0, poucoEcologica: 0, naoEcologica: 0 });
+                labels.push((dt.getDate() < 10 ? '0' + dt.getDate() : dt.getDate()) + '/' + (dt.getMonth() + 1));
+                // alcançado se dt <= hoje
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const dtDay = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+                reached.push(dtDay.getTime() <= today.getTime());
+            }
+        } else if (filtroAtual === 'mensal') {
+            // Dias do mês selecionado
+            const ano = dataInicial.getFullYear();
+            const mes = dataInicial.getMonth();
+            const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+            for (let day = 1; day <= diasNoMes; day++) {
+                buckets.push({ ecologica: 0, poucoEcologica: 0, naoEcologica: 0 });
+                labels.push(day.toString());
+                // alcançado se o dia <= hoje quando for o mês/ano atual, senão é passado e alcançado
+                if (ano === now.getFullYear() && mes === now.getMonth()) {
+                    reached.push(day <= now.getDate());
+                } else {
+                    reached.push(true);
+                }
+            }
+        } else {
+            // total -> últimos 12 meses (todos já alcançados até ao mês atual)
+            for (let i = 11; i >= 0; i--) {
+                const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                buckets.push({ ecologica: 0, poucoEcologica: 0, naoEcologica: 0 });
+                labels.push((dt.getMonth() + 1) + '/' + dt.getFullYear());
+                reached.push(true);
+            }
+        }
+
+        // Preencher buckets com as avaliações (avaliacoes já filtradas por escola)
+        avaliacoes.forEach(av => {
+            const ts = av.timestamp ? av.timestamp.toDate() : new Date(av.data);
+            if (filtroAtual === 'diario') {
+                // considerar só o mesmo dia de dataInicial
+                if (ts.toDateString() !== dataInicial.toDateString()) return;
+                const h = ts.getHours();
+                if (h >= 0 && h < 24) {
+                    if (av.nivelEcologico === 'eficientes-energeticamente') buckets[h].ecologica++;
+                    else if (av.nivelEcologico === 'pouco-eficientes-energeticamente') buckets[h].poucoEcologica++;
+                    else buckets[h].naoEcologica++;
+                }
+            } else if (filtroAtual === 'semanal') {
+                const diff = Math.floor((ts.setHours(0,0,0,0) - dataInicial.setHours(0,0,0,0)) / (24 * 60 * 60 * 1000));
+                // recomputar clean dates
+                const dayIndex = Math.floor((new Date(av.timestamp ? av.timestamp.toDate() : new Date(av.data)).setHours(0,0,0,0) - new Date(dataInicial).setHours(0,0,0,0)) / (24*60*60*1000));
+                if (dayIndex >= 0 && dayIndex < 7) {
+                    if (av.nivelEcologico === 'eficientes-energeticamente') buckets[dayIndex].ecologica++;
+                    else if (av.nivelEcologico === 'pouco-eficientes-energeticamente') buckets[dayIndex].poucoEcologica++;
+                    else buckets[dayIndex].naoEcologica++;
+                }
+            } else if (filtroAtual === 'mensal') {
+                if (ts.getMonth() === dataInicial.getMonth() && ts.getFullYear() === dataInicial.getFullYear()) {
+                    const idx = ts.getDate() - 1;
+                    if (av.nivelEcologico === 'eficientes-energeticamente') buckets[idx].ecologica++;
+                    else if (av.nivelEcologico === 'pouco-eficientes-energeticamente') buckets[idx].poucoEcologica++;
+                    else buckets[idx].naoEcologica++;
+                }
+            } else {
+                // total agrupado por mês (últimos 12 meses)
+                const now = new Date();
+                const monthsDiff = (now.getFullYear() - ts.getFullYear()) * 12 + (now.getMonth() - ts.getMonth());
+                const idx = 11 - monthsDiff;
+                if (idx >= 0 && idx < 12) {
+                    if (av.nivelEcologico === 'eficientes-energeticamente') buckets[idx].ecologica++;
+                    else if (av.nivelEcologico === 'pouco-eficientes-energeticamente') buckets[idx].poucoEcologica++;
+                    else buckets[idx].naoEcologica++;
+                }
+            }
+        });
+
+        // Determinar classificação por bucket (maior contagem; empate -> pior)
+        const pontos = buckets.map(b => {
+            if (b.naoEcologica >= b.poucoEcologica && b.naoEcologica >= b.ecologica) return 0; // Ineficiente
+            if (b.poucoEcologica >= b.ecologica) return 1; // Pouco eficiente
+            return 2; // Eficiente
+        });
+
+        // Ajustar pontos: se o período NÃO foi alcançado -> null (não mostrar);
+        // se foi alcançado e não há registos -> propagar o anterior; se primeiro e sem registos -> pior (0).
+        for (let i = 0; i < buckets.length; i++) {
+            const total = buckets[i].ecologica + buckets[i].poucoEcologica + buckets[i].naoEcologica;
+            if (!reached[i]) {
+                // período futuro: não mostrar
+                pontos[i] = null;
+            } else {
+                if (total === 0) {
+                    if (i > 0 && pontos[i - 1] !== null && pontos[i - 1] !== undefined) {
+                        pontos[i] = pontos[i - 1];
+                    // } else {
+                    //     // Sem valor anterior válido: assumir o pior por omissão (ineficiente)
+                    //     pontos[i] = 0;
+                    }
+                }
+            }
+        }
+
+        // Mapear para labels de Y
+        const yLabels = ['Ineficiente energeticamente', 'Pouco eficiente energeticamente', 'Eficiente energeticamente'];
+
+        // Criar/atualizar gráfico
+        const ctx = document.getElementById('chartEscola').getContext('2d');
+        if (chartEscola) chartEscola.destroy();
+        // Pontos de cor por classificação: 0 -> vermelho, 1 -> laranja, 2 -> verde
+        const colorMap = ['#e74c3c', '#f39c12', '#27ae60'];
+        const pointColors = pontos.map(p => colorMap[p] || '#95a5a6');
+
+        chartEscola = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Classificação da Escola',
+                    data: pontos,
+                    borderColor: '#2c3e50',
+                    backgroundColor: 'rgba(39,174,96,0.08)',
+                    tension: 0.2,
+                    fill: true,
+                    pointRadius: 5,
+                    pointBackgroundColor: pointColors,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                return yLabels[value] || value;
+                            }
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 2
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Desempenho da Escola' }
                 }
             }
         });

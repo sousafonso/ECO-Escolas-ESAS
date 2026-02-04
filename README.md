@@ -25,6 +25,10 @@ Cada sala é avaliada com base em 4 critérios:
 - **Pouco eficiente energeticamente**: 2-3 respostas "não" (1 ponto)
 - **Não eficiente energeticamente**: 4 respostas "não" (0 pontos)
 
+No ranking, a classificação da sala é baseada no número de registos de cada categoria (energética, pouco eficiente energeticamente, não eficiente energeticamente) no período selecionado. Ou seja, uma sala com mais registos "Eficiente energeticamente" será classificada como "Eficiente energeticamente" no ranking. 
+
+Em caso de empates, por exemplo quando uma sala possui o mesmo número de registos em duas categorias distintas, a classificação atribuída será a imediatamente abaixo. Por exemplo, se uma sala tem 5 registos "Eficiente energeticamente" e 5 registos "Pouco eficiente energeticamente", a classificação atribuída será "Pouco eficiente energeticamente".
+
 ## 🚀 Configuração e Deploy
 
 ### Pré-requisitos
