@@ -80,6 +80,18 @@ service cloud.firestore {
 
          // Permite apenas criação com validação rigorosa dos campos
          allow create: if
+            request.resource.data.keys().hasAll([
+               'sala',
+               'escola',
+               'luzes',
+               'luzNatural',
+               'computadores',
+               'projetor',
+               'nivelEcologico',
+               'numNao',
+               'timestamp',
+               'data'
+            ]) &&
             request.resource.data.keys().hasOnly([
                'sala',
                'escola',
@@ -94,22 +106,30 @@ service cloud.firestore {
             ]) &&
             request.resource.data.sala is string &&
             request.resource.data.sala.size() > 0 &&
-            request.resource.data.sala.size() <= 40 &&
+            request.resource.data.sala.size() <= 80 &&
             escolaValida(request.resource.data.escola) &&
             request.resource.data.luzes is bool &&
             request.resource.data.luzNatural is bool &&
             request.resource.data.computadores is bool &&
             request.resource.data.projetor is bool &&
             nivelValido(request.resource.data.nivelEcologico) &&
-            request.resource.data.numNao is int &&
+            request.resource.data.numNao is number &&
             request.resource.data.numNao >= 0 &&
             request.resource.data.numNao <= 4 &&
+            request.resource.data.numNao % 1 == 0 &&
+            request.resource.data.numNao ==
+               (request.resource.data.luzes ? 0 : 1) +
+               (request.resource.data.luzNatural ? 0 : 1) +
+               (request.resource.data.computadores ? 0 : 1) +
+               (request.resource.data.projetor ? 0 : 1) &&
+            (
+               (request.resource.data.numNao == 4 && request.resource.data.nivelEcologico == 'nao-eficientes-energeticamente') ||
+               (request.resource.data.numNao >= 2 && request.resource.data.numNao <= 3 && request.resource.data.nivelEcologico == 'pouco-eficientes-energeticamente') ||
+               (request.resource.data.numNao <= 1 && request.resource.data.nivelEcologico == 'eficientes-energeticamente')
+            ) &&
             request.resource.data.timestamp is timestamp &&
-            request.resource.data.timestamp >= request.time - duration.value(10, 'minutes') &&
-            request.resource.data.timestamp <= request.time + duration.value(1, 'minutes') &&
             request.resource.data.data is string &&
-            request.resource.data.data.size() >= 20 &&
-            request.resource.data.data.size() <= 40;
+            request.resource.data.data.size() >= 20;
 
          // Sem edição/apagamento no cliente
          allow update, delete: if false;
