@@ -21,11 +21,11 @@ Cada sala é avaliada com base em 4 critérios:
 
 ### Classificação Energética
 
-- **Energética**: 0-1 respostas "não" (3 pontos)
+- **Eficiente energeticamente**: 0-1 respostas "não" (3 pontos)
 - **Pouco eficiente energeticamente**: 2-3 respostas "não" (1 ponto)
-- **Não eficiente energeticamente**: 4 respostas "não" (0 pontos)
+- **Ineficiente energeticamente**: 4 respostas "não" (0 pontos)
 
-No ranking, a classificação da sala é baseada no número de registos de cada categoria (energética, pouco eficiente energeticamente, não eficiente energeticamente) no período selecionado. Ou seja, uma sala com mais registos "Eficiente energeticamente" será classificada como "Eficiente energeticamente" no ranking. 
+No ranking, a classificação da sala é baseada no número de registos de cada categoria (eficiente energeticamente, pouco eficiente energeticamente, ineficiente energeticamente) no período selecionado. Ou seja, uma sala com mais registos "Eficiente energeticamente" será classificada como "Eficiente energeticamente" no ranking. 
 
 Em caso de empates, por exemplo quando uma sala possui o mesmo número de registos em duas categorias distintas, a classificação atribuída será a imediatamente abaixo. Por exemplo, se uma sala tem 5 registos "Eficiente energeticamente" e 5 registos "Pouco eficiente energeticamente", a classificação atribuída será "Pouco eficiente energeticamente".
 
@@ -62,10 +62,57 @@ Em caso de empates, por exemplo quando uma sala possui o mesmo número de regist
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permitir leitura pública das avaliações
-    match /avaliacoes/{document=**} {
+      function escolaValida(escola) {
+         return escola in ['ESAS', 'Nogueira'];
+      }
+
+      function nivelValido(nivel) {
+         return nivel in [
+            'eficientes-energeticamente',
+            'pouco-eficientes-energeticamente',
+            'nao-eficientes-energeticamente'
+         ];
+      }
+
+      match /avaliacoes/{documentId} {
+         // Leitura pública para ranking e dashboard
       allow read: if true;
-      allow write: if true; // Pode adicionar validação adicional aqui se necessário
+
+         // Permite apenas criação com validação rigorosa dos campos
+         allow create: if
+            request.resource.data.keys().hasOnly([
+               'sala',
+               'escola',
+               'luzes',
+               'luzNatural',
+               'computadores',
+               'projetor',
+               'nivelEcologico',
+               'numNao',
+               'timestamp',
+               'data'
+            ]) &&
+            request.resource.data.sala is string &&
+            request.resource.data.sala.size() > 0 &&
+            request.resource.data.sala.size() <= 40 &&
+            escolaValida(request.resource.data.escola) &&
+            request.resource.data.luzes is bool &&
+            request.resource.data.luzNatural is bool &&
+            request.resource.data.computadores is bool &&
+            request.resource.data.projetor is bool &&
+            nivelValido(request.resource.data.nivelEcologico) &&
+            request.resource.data.numNao is int &&
+            request.resource.data.numNao >= 0 &&
+            request.resource.data.numNao <= 4 &&
+            request.resource.data.timestamp is timestamp &&
+            request.resource.data.timestamp >= request.time - duration.value(10, 'minutes') &&
+            request.resource.data.timestamp <= request.time + duration.value(1, 'minutes') &&
+            request.resource.data.data is string &&
+            request.resource.data.data.size() >= 20 &&
+            request.resource.data.data.size() <= 40;
+
+         // Sem edição/apagamento no cliente
+         allow update, delete: if false;
     }
   }
 }
