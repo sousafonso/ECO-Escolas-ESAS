@@ -1,23 +1,33 @@
-# 🌱 ECO Escolas ESAS - Sistema de Avaliação Energética
+# 🌱 ECO Escolas ESAS - Sistema de Avaliação Energética e Residual
 
-Sistema web para análise e monitorização da qualidade Energética das salas da escola ESAS, desenvolvido para o programa ECO-Escolas.
+Sistema web para análise e monitorização da qualidade energética e da separação de resíduos nas salas da escola ESAS, desenvolvido para o programa ECO-Escolas.
 
 ## 📋 Funcionalidades
 
 - ✅ **Formulário de Avaliação**: Alunos podem avaliar salas sem necessidade de login
 - 📊 **Dashboard de Estatísticas**: Visualização de dados com gráficos interativos
-- 🏆 **Ranking de Salas**: Classificação das salas mais sustentáveis em termos energéticos
+- 🏆 **Ranking de Salas**: Classificação energética e residual das salas
 - 📱 **Design Responsivo**: Funciona perfeitamente em dispositivos móveis
 - 💾 **Persistência de Dados**: Armazenamento centralizado com Firebase Firestore
 - 🔍 **Filtros Temporais**: Análise por dia, semana, mês ou período total
 
 ## 🎯 Critérios de Avaliação
 
-Cada sala é avaliada com base em 4 critérios:
+Cada sala é avaliada com base em dois blocos:
+
+### Critérios Energéticos (4)
+
 1. Luzes desligadas quando a sala está vazia
 2. Aproveitamento da luz natural (estores abertos)
 3. Computadores desligados quando não estão a ser usados
 4. Projetor desligado no fim da aula
+
+### Critérios de Resíduos (4)
+
+1. Papel separado corretamente
+2. Vidro separado corretamente
+3. Plástico separado corretamente
+4. Orgânico separado corretamente
 
 ### Classificação Energética
 
@@ -28,6 +38,14 @@ Cada sala é avaliada com base em 4 critérios:
 No ranking, a classificação da sala é baseada no número de registos de cada categoria (eficiente energeticamente, pouco eficiente energeticamente, ineficiente energeticamente) no período selecionado. Ou seja, uma sala com mais registos "Eficiente energeticamente" será classificada como "Eficiente energeticamente" no ranking. 
 
 Em caso de empates, por exemplo quando uma sala possui o mesmo número de registos em duas categorias distintas, a classificação atribuída será a imediatamente abaixo. Por exemplo, se uma sala tem 5 registos "Eficiente energeticamente" e 5 registos "Pouco eficiente energeticamente", a classificação atribuída será "Pouco eficiente energeticamente".
+
+### Classificação Residual
+
+- **Resíduos separados corretamente**: 0 respostas "não" (3 pontos)
+- **Resíduos parcialmente separados**: 1-2 respostas "não" (1 ponto)
+- **Resíduos não separados corretamente**: 3-4 respostas "não" (0 pontos)
+
+No ranking residual, aplica-se a mesma lógica de maioria por categoria e o mesmo critério de desempate para a categoria imediatamente abaixo.
 
 ## 🚀 Configuração e Deploy
 
@@ -74,6 +92,14 @@ service cloud.firestore {
          ];
       }
 
+      function nivelResidualValido(nivel) {
+         return nivel in [
+            'residuos-separados-corretamente',
+            'residuos-parcialmente-separados',
+            'residuos-nao-separados-corretamente'
+         ];
+      }
+
       match /avaliacoes/{documentId} {
          // Leitura pública para ranking e dashboard
       allow read: if true;
@@ -87,8 +113,14 @@ service cloud.firestore {
                'luzNatural',
                'computadores',
                'projetor',
+               'residuoPapel',
+               'residuoVidro',
+               'residuoPlastico',
+               'residuoOrganico',
                'nivelEcologico',
                'numNao',
+               'nivelResidual',
+               'numNaoResiduos',
                'timestamp',
                'data'
             ]) &&
@@ -99,8 +131,14 @@ service cloud.firestore {
                'luzNatural',
                'computadores',
                'projetor',
+               'residuoPapel',
+               'residuoVidro',
+               'residuoPlastico',
+               'residuoOrganico',
                'nivelEcologico',
                'numNao',
+               'nivelResidual',
+               'numNaoResiduos',
                'timestamp',
                'data'
             ]) &&
@@ -112,6 +150,10 @@ service cloud.firestore {
             request.resource.data.luzNatural is bool &&
             request.resource.data.computadores is bool &&
             request.resource.data.projetor is bool &&
+            request.resource.data.residuoPapel is bool &&
+            request.resource.data.residuoVidro is bool &&
+            request.resource.data.residuoPlastico is bool &&
+            request.resource.data.residuoOrganico is bool &&
             nivelValido(request.resource.data.nivelEcologico) &&
             request.resource.data.numNao is number &&
             request.resource.data.numNao >= 0 &&
@@ -126,6 +168,21 @@ service cloud.firestore {
                (request.resource.data.numNao == 4 && request.resource.data.nivelEcologico == 'nao-eficientes-energeticamente') ||
                (request.resource.data.numNao >= 2 && request.resource.data.numNao <= 3 && request.resource.data.nivelEcologico == 'pouco-eficientes-energeticamente') ||
                (request.resource.data.numNao <= 1 && request.resource.data.nivelEcologico == 'eficientes-energeticamente')
+            ) &&
+            nivelResidualValido(request.resource.data.nivelResidual) &&
+            request.resource.data.numNaoResiduos is number &&
+            request.resource.data.numNaoResiduos >= 0 &&
+            request.resource.data.numNaoResiduos <= 4 &&
+            request.resource.data.numNaoResiduos % 1 == 0 &&
+            request.resource.data.numNaoResiduos ==
+               (request.resource.data.residuoPapel ? 0 : 1) +
+               (request.resource.data.residuoVidro ? 0 : 1) +
+               (request.resource.data.residuoPlastico ? 0 : 1) +
+               (request.resource.data.residuoOrganico ? 0 : 1) &&
+            (
+               (request.resource.data.numNaoResiduos == 0 && request.resource.data.nivelResidual == 'residuos-separados-corretamente') ||
+               (request.resource.data.numNaoResiduos >= 1 && request.resource.data.numNaoResiduos <= 2 && request.resource.data.nivelResidual == 'residuos-parcialmente-separados') ||
+               (request.resource.data.numNaoResiduos >= 3 && request.resource.data.nivelResidual == 'residuos-nao-separados-corretamente')
             ) &&
             request.resource.data.timestamp is timestamp &&
             request.resource.data.data is string &&
@@ -225,7 +282,7 @@ ECO-Escolas-ESAS/
 
 1. Aceda ao site: `https://sousafonso.github.io/ECO-Escolas-ESAS/`
 2. Selecione a sala que está a avaliar
-3. Responda às 4 questões sobre práticas Eficientes energeticamente
+3. Responda às 4 questões energéticas e às 4 questões de resíduos
 4. Clique em "Enviar Avaliação"
 
 ### Para Consultar Estatísticas
@@ -237,7 +294,7 @@ ECO-Escolas-ESAS/
 ### Para Ver o Ranking
 
 1. Clique em "Ranking" no menu
-2. Veja as salas ordenadas por pontuação
+2. Escolha o tipo de ranking: "Energético" ou "Resíduos"
 3. Use os filtros para diferentes períodos
 
 ## 🔒 Segurança e Privacidade

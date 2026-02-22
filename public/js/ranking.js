@@ -1,12 +1,14 @@
 // Lógica do ranking
 document.addEventListener('DOMContentLoaded', function() {
     const filterBtns = document.querySelectorAll('.filter-btn');
+    const tipoRankingBtns = document.querySelectorAll('.tipo-ranking-btn');
     const escolaFilterSelect = document.getElementById('escolaFilter');
     const mesFilterGroup = document.getElementById('mesFilterGroup');
     const mesFilterSelect = document.getElementById('mesFilter');
     const rankingContainer = document.getElementById('rankingContainer');
     const loadingDiv = document.getElementById('loading');
     let filtroAtual = 'diario';
+    let tipoRankingAtual = 'energetico';
     let escolaAtual = '';
     let mesAtual = new Date().getMonth();
 
@@ -24,6 +26,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 mesFilterGroup.style.display = 'none';
             }
             
+            carregarRanking();
+        });
+    });
+
+    // Event listeners para tipo de ranking
+    tipoRankingBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            tipoRankingBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            tipoRankingAtual = this.dataset.tipo;
             carregarRanking();
         });
     });
@@ -66,6 +78,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function calcularNivelResidual(avaliacao) {
+        if (avaliacao.nivelResidual) {
+            return avaliacao.nivelResidual;
+        }
+
+        const camposResiduos = ['residuoPapel', 'residuoVidro', 'residuoPlastico', 'residuoOrganico'];
+        const temTodosCampos = camposResiduos.every(campo => typeof avaliacao[campo] === 'boolean');
+
+        if (!temTodosCampos) {
+            return null;
+        }
+
+        const numNaoResiduos = camposResiduos.filter(campo => avaliacao[campo] === false).length;
+
+        if (numNaoResiduos === 0) return 'residuos-separados-corretamente';
+        if (numNaoResiduos <= 2) return 'residuos-parcialmente-separados';
+        return 'residuos-nao-separados-corretamente';
+    }
+
     // Carregar ranking
     async function carregarRanking() {
         loadingDiv.style.display = 'block';
@@ -96,22 +127,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!salasPontuacao[av.sala]) {
                     salasPontuacao[av.sala] = {
                         nome: av.sala,
-                        pontos: 0,
-                        totalAvaliacoes: 0,
+                        pontosEnergia: 0,
+                        totalAvaliacoesEnergia: 0,
                         ecologicas: 0,
                         poucoEcologicas: 0,
                         naoEcologicas: 0,
-                        ultimoNivel: null,
+                        pontosResidual: 0,
+                        totalAvaliacoesResidual: 0,
+                        residuosCorretos: 0,
+                        residuosParciais: 0,
+                        residuosIncorretos: 0,
+                        ultimoNivelEnergetico: null,
+                        ultimoNivelResidual: null,
                         ultimoTimestamp: null
                     };
                 }
 
-                salasPontuacao[av.sala].totalAvaliacoes++;
+                salasPontuacao[av.sala].totalAvaliacoesEnergia++;
 
                 const timestamp = av.timestamp ? av.timestamp.toDate() : new Date(av.data);
                 if (!salasPontuacao[av.sala].ultimoTimestamp || timestamp > salasPontuacao[av.sala].ultimoTimestamp) {
                     salasPontuacao[av.sala].ultimoTimestamp = timestamp;
-                    salasPontuacao[av.sala].ultimoNivel = av.nivelEcologico;
+                    salasPontuacao[av.sala].ultimoNivelEnergetico = av.nivelEcologico;
                 }
 
                 // Sistema de pontuação:
@@ -119,25 +156,54 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Pouco eficiente energeticamente: 1 ponto
                 // Não eficiente energeticamente: 0 pontos
                 if (av.nivelEcologico === 'eficientes-energeticamente') {
-                    salasPontuacao[av.sala].pontos += 3;
+                    salasPontuacao[av.sala].pontosEnergia += 3;
                     salasPontuacao[av.sala].ecologicas++;
                 } else if (av.nivelEcologico === 'pouco-eficientes-energeticamente') {
-                    salasPontuacao[av.sala].pontos += 1;
+                    salasPontuacao[av.sala].pontosEnergia += 1;
                     salasPontuacao[av.sala].poucoEcologicas++;
                 } else {
                     salasPontuacao[av.sala].naoEcologicas++;
                 }
+
+                // Sistema de pontuação residual:
+                // Resíduos separados corretamente: 3 pontos
+                // Resíduos parcialmente separados: 1 ponto
+                // Resíduos não separados corretamente: 0 pontos
+                const nivelResidual = calcularNivelResidual(av);
+                if (nivelResidual) {
+                    salasPontuacao[av.sala].totalAvaliacoesResidual++;
+
+                    if (timestamp >= salasPontuacao[av.sala].ultimoTimestamp) {
+                        salasPontuacao[av.sala].ultimoNivelResidual = nivelResidual;
+                    }
+
+                    if (nivelResidual === 'residuos-separados-corretamente') {
+                        salasPontuacao[av.sala].pontosResidual += 3;
+                        salasPontuacao[av.sala].residuosCorretos++;
+                    } else if (nivelResidual === 'residuos-parcialmente-separados') {
+                        salasPontuacao[av.sala].pontosResidual += 1;
+                        salasPontuacao[av.sala].residuosParciais++;
+                    } else {
+                        salasPontuacao[av.sala].residuosIncorretos++;
+                    }
+                }
             });
 
             // Converter para array e ordenar
-            const ranking = Object.values(salasPontuacao)
-                .sort((a, b) => b.pontos - a.pontos);
+            let ranking = Object.values(salasPontuacao);
+
+            if (tipoRankingAtual === 'residual') {
+                ranking = ranking.filter(sala => sala.totalAvaliacoesResidual > 0)
+                    .sort((a, b) => b.pontosResidual - a.pontosResidual);
+            } else {
+                ranking = ranking.sort((a, b) => b.pontosEnergia - a.pontosEnergia);
+            }
 
             // Exibir ranking
             if (ranking.length === 0) {
                 rankingContainer.innerHTML = '<p style="text-align: center; padding: 40px; color: #7f8c8d;">Nenhuma avaliação encontrada para este período.</p>';
             } else {
-                exibirRanking(ranking);
+                exibirRanking(ranking, tipoRankingAtual);
             }
 
         } catch (error) {
@@ -149,28 +215,49 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Exibir ranking
-    function exibirRanking(ranking) {
+    function exibirRanking(ranking, tipoRanking) {
         rankingContainer.innerHTML = '';
 
         ranking.forEach((sala, index) => {
             const posicao = index + 1;
-            const media = (sala.pontos / sala.totalAvaliacoes).toFixed(1);
             
-            // Determinar classificação geral com base nas contagens no período
-            // Regras: escolher a categoria com maior número de registos;
-            // em caso de empate, escolher a pior (naoEcologicas > poucoEcologicas > ecologicas)
             let classificacao = 'nao-ecologica';
-            let classificacaoTexto = 'Ineficiente energeticamente';
+            let classificacaoTexto = '';
+            let detalhes = '';
+            let score = 0;
 
-            if (sala.naoEcologicas >= sala.poucoEcologicas && sala.naoEcologicas >= sala.ecologicas) {
-                classificacao = 'nao-ecologica';
-                classificacaoTexto = 'Ineficiente energeticamente';
-            } else if (sala.poucoEcologicas >= sala.ecologicas) {
-                classificacao = 'pouco-ecologica';
-                classificacaoTexto = 'Pouco eficiente energeticamente';
+            if (tipoRanking === 'residual') {
+                // Regras: escolher a categoria com maior número de registos;
+                // em caso de empate, escolher a pior (incorretos > parciais > corretos)
+                if (sala.residuosIncorretos >= sala.residuosParciais && sala.residuosIncorretos >= sala.residuosCorretos) {
+                    classificacao = 'nao-ecologica';
+                    classificacaoTexto = 'Resíduos mal separados';
+                } else if (sala.residuosParciais >= sala.residuosCorretos) {
+                    classificacao = 'pouco-ecologica';
+                    classificacaoTexto = 'Separação residual parcial';
+                } else {
+                    classificacao = 'ecologica';
+                    classificacaoTexto = 'Resíduos bem separados';
+                }
+
+                detalhes = `${sala.totalAvaliacoesResidual} avaliações residuais • ${sala.residuosCorretos} Separados corretamente, ${sala.residuosParciais} Separados parcialmente, ${sala.residuosIncorretos} Separados incorretamente`;
+                score = sala.pontosResidual;
             } else {
-                classificacao = 'ecologica';
-                classificacaoTexto = 'Eficiente energeticamente';
+                // Regras: escolher a categoria com maior número de registos;
+                // em caso de empate, escolher a pior (naoEcologicas > poucoEcologicas > ecologicas)
+                if (sala.naoEcologicas >= sala.poucoEcologicas && sala.naoEcologicas >= sala.ecologicas) {
+                    classificacao = 'nao-ecologica';
+                    classificacaoTexto = 'Ineficiente energeticamente';
+                } else if (sala.poucoEcologicas >= sala.ecologicas) {
+                    classificacao = 'pouco-ecologica';
+                    classificacaoTexto = 'Pouco eficiente energeticamente';
+                } else {
+                    classificacao = 'ecologica';
+                    classificacaoTexto = 'Eficiente energeticamente';
+                }
+
+                detalhes = `${sala.totalAvaliacoesEnergia} avaliações • ${sala.ecologicas} Eficientes energeticamente, ${sala.poucoEcologicas} Pouco eficientes energeticamente, ${sala.naoEcologicas} Ineficientes energeticamente`;
+                score = sala.pontosEnergia;
             }
 
             const itemDiv = document.createElement('div');
@@ -186,16 +273,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="ranking-info">
                     <div class="ranking-sala">${sala.nome}</div>
                     <div class="ranking-details">
-                        ${sala.totalAvaliacoes} avaliações • 
-                        ${sala.ecologicas} Eficientes energeticamente, 
-                        ${sala.poucoEcologicas} Pouco eficientes energeticamente, 
-                        ${sala.naoEcologicas} Ineficientes energeticamente
+                        ${detalhes}
                     </div>
                 </div>
                 <div class="ranking-badge ${classificacao}">
                     ${classificacaoTexto}
                 </div>
-                <div class="ranking-score">${sala.pontos} pts</div>
+                <div class="ranking-score">${score} pts</div>
             `;
 
             rankingContainer.appendChild(itemDiv);

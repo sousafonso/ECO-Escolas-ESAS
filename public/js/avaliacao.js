@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const luzNatural = document.querySelector('input[name="luzNatural"]:checked').value;
         const computadores = document.querySelector('input[name="computadores"]:checked').value;
         const projetor = document.querySelector('input[name="projetor"]:checked').value;
+        const residuoPapel = document.querySelector('input[name="residuoPapel"]:checked').value;
+        const residuoVidro = document.querySelector('input[name="residuoVidro"]:checked').value;
+        const residuoPlastico = document.querySelector('input[name="residuoPlastico"]:checked').value;
+        const residuoOrganico = document.querySelector('input[name="residuoOrganico"]:checked').value;
 
         // Calcular número de "não"
         const respostas = [luzes_ligadas, luzNatural, computadores, projetor];
@@ -28,6 +32,19 @@ document.addEventListener('DOMContentLoaded', function() {
             nivelEcologico = 'eficientes-energeticamente';
         }
 
+        // Calcular nível de separação de resíduos
+        const respostasResiduos = [residuoPapel, residuoVidro, residuoPlastico, residuoOrganico];
+        const numNaoResiduos = respostasResiduos.filter(r => r === 'nao').length;
+
+        let nivelResidual;
+        if (numNaoResiduos === 0) {
+            nivelResidual = 'residuos-separados-corretamente';
+        } else if (numNaoResiduos <= 2) {
+            nivelResidual = 'residuos-parcialmente-separados';
+        } else {
+            nivelResidual = 'residuos-nao-separados-corretamente';
+        }
+
         // Preparar dados para enviar
         const avaliacao = {
             sala: sala,
@@ -36,8 +53,14 @@ document.addEventListener('DOMContentLoaded', function() {
             luzNatural: luzNatural === 'sim',
             computadores: computadores === 'sim',
             projetor: projetor === 'sim',
+            residuoPapel: residuoPapel === 'sim',
+            residuoVidro: residuoVidro === 'sim',
+            residuoPlastico: residuoPlastico === 'sim',
+            residuoOrganico: residuoOrganico === 'sim',
             nivelEcologico: nivelEcologico,
             numNao: numNao,
+            nivelResidual: nivelResidual,
+            numNaoResiduos: numNaoResiduos,
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             data: new Date().toISOString()
         };
@@ -57,7 +80,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Erro ao salvar avaliação:', error);
-            mostrarMensagem('Erro ao enviar avaliação. Por favor, tente novamente.', 'erro');
+            if (error && error.code === 'permission-denied') {
+                mostrarMensagem('Sem permissões para gravar. Atualiza e publica as regras do Firestore (incluindo campos de resíduos) e tenta novamente.', 'erro');
+            } else {
+                mostrarMensagem('Erro ao enviar avaliação. Por favor, tente novamente.', 'erro');
+            }
         }
     });
 
